@@ -1,0 +1,152 @@
+﻿@model AppProductImages.Models.ProductItemViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-2">
+        <h2 class="text-center">Редагувати товар</h2>
+        <form method="post" enctype="multipart/form-data" asp-controller="Home" asp-action="Edit">
+
+
+            <input type="hidden" asp-for="Id" class="form-control" />
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Price" class="control-label"></label>
+                <input asp-for="Price" class="form-control" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Фото</label>
+                <div class="row" id="contentImage">
+                    @foreach (var img in Model.Images)
+                    {
+                        <div class="col-md-2">
+                            <img src="/images/@img.Path" width="100%" />
+                            <span class="text-danger align-top deleteitem" style="cursor: pointer">
+                                <i class="fas fa-times"></i>
+                            </span>
+                        </div>
+                    }
+                    <div class="col-md-2">
+                        <img src="/img/add.jpg"
+                             id="btnAddImage"
+                             style="cursor:pointer"
+                             width="100%" />
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(function () {
+            $(".deleteitem").on("click", function (e) {
+                let $div = $(e.target).closest("div");
+                $div.remove();
+                // додавання інпута який містить посилання нв фотографію яку видалити
+                $("#contentImage").prepend(`<input type="hidden"
+                                    value="${$div.find('img').attr("src")}" name="deletedImages"/>`);
+                
+            });
+        });
+    </script>
+
+    <script>
+        window.addEventListener("load", async function () {
+            let id = 1;
+            //Додати фотку в список фото (нову фотку)
+            let btnAddImage = document.getElementById("btnAddImage");
+            btnAddImage.addEventListener("click", function () {
+                //блок, який містить усі фотки
+                let $blockImages = $("#contentImage");
+                //Іd - інтпута для вибору файла фото
+                let idName = "image" + id;
+                id++;
+                let file = $(`<input type="file"
+                                    style="display:none"
+                                    multiple class="form-control"
+                                    id="${idName}" name="images">`);
+                //додаємо інпут в дом дерево - там де знаходяться усі елементи фото
+                $blockImages.prepend(file);
+                //ми додали наш інпут для файлу в дом, тепер мона його отримати
+                let input = document.getElementById(idName);
+                //Клікаємо по інтпуту
+                input.click();
+                //якщо ми обрали, якись файл
+                input.onchange = function (e) {
+                    //console.log(e.target.files[0].name);
+                    ///ми отримуємо список файлі, що обрали
+                    ///event.target
+                    var files = e.target.files;
+                    for (var i = 0; i < files.length; i++) {
+
+                        //добавляємо іконку х - для видалення
+                        var $deleteIcon = $(`
+                                    <span class="text-danger align-top" style="cursor: pointer">
+                                        <i class="fas fa-times"></i>
+                                    </span>`);
+
+                        //створюємо дів, для збереження фото
+                        let $newDiv = $(`
+                                <div class="col-md-2" data-img="${files[i].name}">
+                                    <img src="${URL.createObjectURL(files[i])}"
+                                         width="100%"/>
+                                </div>
+                            `);
+                        //в дів добавляємо хрестик
+                        $newDiv.append($deleteIcon);
+
+                        //створюємо дів, для збереження фото
+                        $blockImages.prepend($newDiv);
+
+
+                        //Обробник видалити фотку із списку
+                        $deleteIcon.on("click", function (e) {
+                            //Для того, щоб із інтпута типу file можна було видаляти файлики
+                            var fileList = new DataTransfer();
+                            //Находимо головний дів для блоку
+                            let $div = $(e.target).closest("div");
+                            $div.remove();
+                            //видаляємо з інтпута типу файл, файл до якого віносилася фотографія
+                            let fileInputImages = document.getElementById(idName);
+                            $(fileInputImages.files).each(index => {
+
+                                if (fileInputImages.files[index]["name"] != $div.attr("data-img")) {
+                                    fileList.items.add(fileInputImages.files[index]);
+                                };
+                            });
+                            //перезаписуємо у відповідному інпуті фотки, щоб вони не відпавилися на север.
+                            fileInputImages.files = fileList.files;
+                            //Якщо в інпуті файл відсутні фотки, то ми його грохаємо
+                            if (fileList.files.length == 0)
+                                $(`#${idName}`).remove();
+                        });
+
+
+                    }
+                };
+            });
+        });
+    </script>
+
+}

@@ -25,26 +25,46 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @foreach (var img in item.Images)
-                {
-                    <img src="@img.Path" width="150" class="mx-2">
-                }
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @foreach (var img in item.Images)
+                    {
+                        <img src="@img.Path" width="150" class="mx-2">
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">
+                        <i class="fas fa-edit fa-lg"></i>
+                    </a>
+                    <div class="mx-auto my-auto" style="cursor: pointer">
+                        <span class="text-danger deleteitem" data-element="@item.Id"><i class="fas fa-trash-alt fa-lg"></i></span>
+                    </div>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+@section Scripts {
+    <script src="~/lib/axios/axios.min.js"></script>
+    <script>
+        $(function () {
+            $(".deleteitem").on("click", function (e) {
+                var id = $(e.target).closest("span").attr("data-element");
+                axios.post(`/Home/Delete/${id}`)
+                    .then(result => {
+                        $(e.target).closest("tr").remove();
+                    });
+            });
+        });
+    </script>
+
+}
