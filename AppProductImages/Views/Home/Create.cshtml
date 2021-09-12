@@ -48,22 +48,32 @@
 @section Scripts {
 <script>
     window.addEventListener("load", async function () {
-        let btnAddImage = document.getElementById("btnAddImage");
         let id = 1;
+        //Додати фотку в список фото (нову фотку)
+        let btnAddImage = document.getElementById("btnAddImage");
         btnAddImage.addEventListener("click", function () {
-            let imageName = "image" + id;
+            //блок, який містить усі фотки
+            let $blockImages = $("#contentImage");
+            //Іd - інтпута для вибору файла фото
+            let idName = "image" + id;
             id++;
             let file = $(`<input type="file"
                                 style="display:none"
                                 multiple class="form-control"
-                                id="${imageName}" name="images">`);
-            $("#contentImage").prepend(file);
-            document.getElementById(imageName).click();
-            document.getElementById(imageName).onchange = function (e) {
+                                id="${idName}" name="images">`);
+            //додаємо інпут в дом дерево - там де знаходяться усі елементи фото
+            $blockImages.prepend(file);
+            //ми додали наш інпут для файлу в дом, тепер мона його отримати
+            let input = document.getElementById(idName);
+            //Клікаємо по інтпуту
+            input.click();
+            //якщо ми обрали, якись файл
+            input.onchange = function (e) {
                 //console.log(e.target.files[0].name);
                 for (var i = 0; i < e.target.files.length; i++) {
 
-                    $("#contentImage").prepend(`
+                    //створюємо дів, для збереження фото
+                    $blockImages.prepend(`
                             <div class="col-md-2">
                                 <img src="${URL.createObjectURL(e.target.files[i])}"
                                      width="100%"/>
