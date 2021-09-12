@@ -70,15 +70,54 @@
             //якщо ми обрали, якись файл
             input.onchange = function (e) {
                 //console.log(e.target.files[0].name);
-                for (var i = 0; i < e.target.files.length; i++) {
+                ///ми отримуємо список файлі, що обрали
+                ///event.target
+                var files = e.target.files;
+                for (var i = 0; i < files.length; i++) {
+
+                    //добавляємо іконку х - для видалення
+                    var $deleteIcon = $(`
+                                <span class="text-danger align-top" style="cursor: pointer">
+                                    <i class="fas fa-times"></i>
+                                </span>`);
 
                     //створюємо дів, для збереження фото
-                    $blockImages.prepend(`
-                            <div class="col-md-2">
-                                <img src="${URL.createObjectURL(e.target.files[i])}"
+                    let $newDiv = $(`
+                            <div class="col-md-2" data-img="${files[i].name}">
+                                <img src="${URL.createObjectURL(files[i])}"
                                      width="100%"/>
                             </div>
                         `);
+                    //в дів добавляємо хрестик
+                    $newDiv.append($deleteIcon);
+
+                    //створюємо дів, для збереження фото
+                    $blockImages.prepend($newDiv);
+
+
+                    //Обробник видалити фотку із списку
+                    $deleteIcon.on("click", function (e) {
+                        //Для того, щоб із інтпута типу file можна було видаляти файлики
+                        var fileList = new DataTransfer();
+                        //Находимо головний дів для блоку
+                        let $div = $(e.target).closest("div");
+                        $div.remove();
+                        //видаляємо з інтпута типу файл, файл до якого віносилася фотографія
+                        let fileInputImages = document.getElementById(idName);
+                        $(fileInputImages.files).each(index => {
+
+                            if (fileInputImages.files[index]["name"] != $div.attr("data-img")) {
+                                fileList.items.add(fileInputImages.files[index]);
+                            };
+                        });
+                        //перезаписуємо у відповідному інпуті фотки, щоб вони не відпавилися на север.
+                        fileInputImages.files = fileList.files;
+                        //Якщо в інпуті файл відсутні фотки, то ми його грохаємо
+                        if (fileList.files.length == 0)
+                            $(`#${idName}`).remove();
+                    });
+
+
                 }
             };
         });
